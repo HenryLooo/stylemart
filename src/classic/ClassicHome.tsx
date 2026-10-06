@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import CartDrawer from './components/CartDrawer'
-import AnnouncementBar from './sections/AnnouncementBar'
 import AppointmentBand from './sections/AppointmentBand'
 import AsSeenIn from './sections/AsSeenIn'
 import Categories from './sections/Categories'
@@ -31,7 +30,6 @@ export default function ClassicHome() {
       >
         Skip to content
       </a>
-      <AnnouncementBar />
       <Header />
       <main id="main">
         <Hero />

@@ -11,7 +11,7 @@ export default function Hero() {
     <section
       id="top"
       aria-labelledby="hero-title"
-      className="relative isolate flex h-[calc(100svh-100px)] max-h-[880px] min-h-[540px] scroll-mt-24 overflow-hidden bg-classic-charcoal lg:h-[calc(100svh-124px)] lg:min-h-[600px]"
+      className="relative isolate flex h-[calc(100svh-64px)] max-h-[880px] min-h-[540px] scroll-mt-24 overflow-hidden bg-classic-charcoal lg:h-[calc(100svh-88px)] lg:min-h-[600px]"
     >
       {/* Slow Ken Burns: settles from a gentle zoom over the first seconds on screen */}
       <motion.img
