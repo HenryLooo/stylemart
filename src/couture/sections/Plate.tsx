@@ -6,27 +6,20 @@ import { formatPrice } from '../../shared/format'
 import { EASE, whatsappLink } from '../ui'
 import AddToBagButton from './AddToBagButton'
 
-export interface Spot {
-  x: number
-  y: number
-  label: string
-}
-
 export interface Look {
   id: string
-  /** Detail annotations, drawn from the product name and note */
-  spots: Spot[]
-  /** Where the shop hotspot sits */
+  /** Craft details shown in the shop card, drawn from the product name and note */
+  details: string[]
+  /** Where the hotspot sits on the photo */
   main: { x: number; y: number }
 }
 
-/** A look presented as a framed plate, with annotated hotspots and a shop card. */
+/** A look (one complete outfit) presented as a framed plate with a single shop hotspot. */
 export default function Plate({ look, index, className = '' }: { look: Look; index: number; className?: string }) {
   const p = productById(look.id)!
-  const [open, setOpen] = useState<number | 'main' | null>(null)
+  const [open, setOpen] = useState(false)
   const uid = useId()
   const no = String(index + 1).padStart(2, '0')
-  const toggle = (k: number | 'main') => setOpen((o) => (o === k ? null : k))
 
   const action =
     p.price != null ? (
@@ -49,9 +42,9 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
     <figure
       className={`shrink-0 ${className}`}
       onKeyDown={(e) => {
-        if (e.key === 'Escape' && open !== null) {
+        if (e.key === 'Escape' && open) {
           e.stopPropagation()
-          setOpen(null)
+          setOpen(false)
         }
       }}
     >
@@ -64,54 +57,21 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
             draggable={false}
             className="h-full w-full object-cover"
           />
-          {/* A whisper of ink at the foot so the card and spots sit on the plate */}
+          {/* A whisper of ink at the foot so the card sits on the plate */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-couture-ink/25 via-transparent to-transparent" />
           <span className="absolute left-3 top-3 font-bodoni text-sm italic text-couture-ink/70">Plate {no}</span>
 
-          {look.spots.map((s, i) => {
-            const isOpen = open === i
-            const left = s.x > 55
-            return (
-              <div key={i} className="absolute z-10" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
-                <SpotButton
-                  open={isOpen}
-                  onClick={() => toggle(i)}
-                  label={`Detail: ${s.label}`}
-                  controls={`${uid}-s${i}`}
-                />
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.span
-                      id={`${uid}-s${i}`}
-                      role="note"
-                      className={`absolute top-1/2 w-max max-w-[11rem] -translate-y-1/2 border border-couture-gold/50 bg-couture-ink/90 px-3 py-2 font-bodoni text-[13px] italic leading-snug text-couture-bone backdrop-blur-sm ${
-                        left ? 'right-6' : 'left-6'
-                      }`}
-                      initial={{ opacity: 0, x: left ? 8 : -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4, ease: EASE }}
-                    >
-                      {s.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
-            )
-          })}
-
           <div className="absolute z-10" style={{ left: `${look.main.x}%`, top: `${look.main.y}%` }}>
             <SpotButton
-              main
-              open={open === 'main'}
-              onClick={() => toggle('main')}
+              open={open}
+              onClick={() => setOpen((o) => !o)}
               label={`Shop this look: ${p.name}`}
               controls={`${uid}-card`}
             />
           </div>
 
           <AnimatePresence>
-            {open === 'main' && (
+            {open && (
               <motion.div
                 id={`${uid}-card`}
                 className="absolute inset-x-2 bottom-2 z-20 border border-couture-gold/50 bg-couture-ink/95 p-4 text-couture-bone backdrop-blur-sm sm:inset-x-3 sm:bottom-3 sm:p-5"
@@ -122,7 +82,7 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
               >
                 <button
                   type="button"
-                  onClick={() => setOpen(null)}
+                  onClick={() => setOpen(false)}
                   aria-label="Close"
                   className="absolute right-1.5 top-1.5 grid size-8 place-items-center text-couture-mute hover:text-couture-bone"
                 >
@@ -133,6 +93,14 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
                 </p>
                 <p className="mt-2 font-bodoni text-[17px] leading-snug sm:text-lg">{p.name}</p>
                 <p className="mt-1.5 font-manrope text-[12px] leading-relaxed text-couture-bone/70">{p.note}</p>
+                <ul className="mt-3 space-y-1">
+                  {look.details.map((d) => (
+                    <li key={d} className="flex items-baseline gap-2 font-bodoni text-[13px] italic text-couture-bone/85">
+                      <span aria-hidden className="h-px w-3 shrink-0 translate-y-[-3px] bg-couture-gold/70" />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-couture-gold/25 pt-3">
                   <span className="whitespace-nowrap font-bodoni text-base text-couture-gold-light sm:text-lg">{formatPrice(p.price)}</span>
                   {p.price != null ? (
@@ -177,13 +145,11 @@ function SpotButton({
   onClick,
   label,
   controls,
-  main = false,
 }: {
   open: boolean
   onClick: () => void
   label: string
   controls: string
-  main?: boolean
 }) {
   return (
     <button
@@ -197,20 +163,16 @@ function SpotButton({
       {!open && (
         <span
           aria-hidden
-          className={`absolute inset-1.5 animate-ping rounded-full [animation-duration:2.4s] ${
-            main ? 'bg-couture-gold/60' : 'border border-white/80'
-          }`}
+          className="absolute inset-1.5 animate-ping rounded-full bg-couture-gold/60 [animation-duration:2.4s]"
         />
       )}
       <span
         aria-hidden
-        className={`relative grid place-items-center rounded-full shadow-[0_2px_14px_rgba(0,0,0,.35)] transition-[background-color,transform] duration-500 ease-couture ${
-          main
-            ? 'size-8 bg-couture-gold text-couture-ink hover:bg-couture-gold-light'
-            : 'size-6 border border-white/90 bg-couture-ink/55 text-white backdrop-blur-sm hover:bg-couture-ink/80'
-        } ${open ? 'rotate-45' : ''}`}
+        className={`relative grid size-8 place-items-center rounded-full bg-couture-gold text-couture-ink shadow-[0_2px_14px_rgba(0,0,0,.35)] transition-[background-color,transform] duration-500 ease-couture hover:bg-couture-gold-light ${
+          open ? 'rotate-45' : ''
+        }`}
       >
-        <Plus className={main ? 'size-4' : 'size-3.5'} strokeWidth={main ? 1.8 : 1.5} />
+        <Plus className="size-4" strokeWidth={1.8} />
       </span>
     </button>
   )

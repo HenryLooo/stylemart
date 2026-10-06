@@ -7,66 +7,42 @@ import Plate, { type Look } from './Plate'
 const looks: Look[] = [
   {
     id: 'p9',
-    spots: [
-      { x: 50, y: 25, label: 'Full-sleeve sequin blouse' },
-      { x: 36, y: 74, label: 'Blush sequin lengha' },
-    ],
+    details: ['Full-sleeve sequin blouse', 'Blush sequin lengha'],
     main: { x: 58, y: 52 },
   },
   {
     id: 'p3',
-    spots: [
-      { x: 30, y: 46, label: 'Hand-worked Kashmiri gara sleeves' },
-      { x: 56, y: 78, label: 'Teal-to-sapphire ombré silk' },
-    ],
+    details: ['Hand-worked Kashmiri gara sleeves', 'Teal-to-sapphire ombré silk'],
     main: { x: 52, y: 40 },
   },
   {
     id: 'p11',
-    spots: [
-      { x: 40, y: 34, label: 'Hand-painted, gara-embroidered pallu' },
-      { x: 62, y: 84, label: 'Champagne draped gown' },
-    ],
+    details: ['Hand-painted, gara-embroidered pallu', 'Champagne draped gown'],
     main: { x: 52, y: 58 },
   },
   {
     id: 'p13',
-    spots: [
-      { x: 38, y: 24, label: 'Hand-embroidered lion-mane shoulder' },
-      { x: 56, y: 72, label: 'SG60 edition Indo-Western tuxedo' },
-    ],
+    details: ['Hand-embroidered lion-mane shoulder', 'SG60 edition Indo-Western tuxedo'],
     main: { x: 52, y: 42 },
   },
   {
     id: 'p7',
-    spots: [
-      { x: 34, y: 38, label: 'Sculpted full-sleeve jacket' },
-      { x: 58, y: 74, label: 'Printed silver saree gown' },
-    ],
+    details: ['Sculpted full-sleeve jacket', 'Printed silver saree gown'],
     main: { x: 50, y: 52 },
   },
   {
     id: 'p2',
-    spots: [
-      { x: 50, y: 27, label: 'Embellished bustier' },
-      { x: 64, y: 46, label: 'Liquid-metal drape' },
-    ],
+    details: ['Embellished bustier', 'Liquid-metal drape'],
     main: { x: 46, y: 64 },
   },
   {
     id: 'p5',
-    spots: [
-      { x: 50, y: 32, label: 'Sweetheart bodice' },
-      { x: 40, y: 60, label: 'Threadwork skirt in petal pink' },
-    ],
+    details: ['Sweetheart bodice', 'Threadwork skirt in petal pink'],
     main: { x: 58, y: 48 },
   },
   {
     id: 'p6',
-    spots: [
-      { x: 50, y: 26, label: 'Structured beaded blouse' },
-      { x: 60, y: 52, label: 'Pre-draped metallic saree' },
-    ],
+    details: ['Structured beaded blouse', 'Pre-draped metallic saree'],
     main: { x: 45, y: 66 },
   },
 ]
@@ -92,7 +68,7 @@ function Intro({ compact = false }: { compact?: boolean }) {
         Lookbook
       </h2>
       <p className="mt-6 max-w-[34ch] font-manrope text-[14px] font-light leading-[1.75] text-couture-bone/75">
-        Eight looks from the atelier, from bridal lengha to the SG60 Lion Suit. Open a + on any look for its details, its price
+        Eight looks from the atelier, from bridal lengha to the SG60 Lion Suit. Each is sold as a complete outfit. Open the + on any look for its details, price
         and a way to make it yours.
       </p>
     </div>
@@ -172,10 +148,12 @@ function Horizontal() {
           style={{ x }}
           onFocusCapture={(e) => {
             // Keyboard users: bring the focused look into view by scrolling the page
+            // (only :focus-visible: a mouse click also focuses, and scrolling mid-click would make it miss)
+            const el = e.target as HTMLElement
             const sec = section.current
             const tr = track.current
-            if (!sec || !tr || dist === 0) return
-            const r = (e.target as HTMLElement).getBoundingClientRect()
+            if (!sec || !tr || dist === 0 || !el.matches(':focus-visible')) return
+            const r = el.getBoundingClientRect()
             const left = r.left - tr.getBoundingClientRect().left
             const want = Math.min(dist, Math.max(0, left - window.innerWidth / 2 + r.width / 2))
             const top = sec.getBoundingClientRect().top + window.scrollY
