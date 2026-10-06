@@ -2,13 +2,12 @@ import { useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
-import { ProductImage } from '../shared/catalog/ProductImage'
 import { useActiveProducts } from '../shared/catalog/store'
-import { usePreloadImage } from '../shared/catalog/usePreloadImage'
 import { isMadeToOrder, isSoldOut, type Product } from '../shared/catalog/types'
 import { formatPrice } from '../shared/format'
 import CoutureShell from './CoutureShell'
 import AddToBagButton from './sections/AddToBagButton'
+import ZoomPhoto from './sections/ZoomPhoto'
 import { countIn, filterBySlug, filters, sortProducts, sorts, type SortValue } from './catalogue'
 import { EASE, Folio, btnSolid, whatsappLink } from './ui'
 
@@ -198,7 +197,6 @@ export default function CollectionPage() {
 function Card({ p }: { p: Product }) {
   const madeToOrder = isMadeToOrder(p)
   const soldOut = isSoldOut(p)
-  usePreloadImage(p.closeup)
   return (
     <motion.li
       layout
@@ -210,36 +208,9 @@ function Card({ p }: { p: Product }) {
     >
       <div className="border border-couture-gold/35 bg-couture-ink-2 p-1.5 transition-colors duration-500 group-hover:border-couture-gold/70">
         <div className="relative aspect-[2/3] overflow-hidden bg-[#e9e7e4]">
-          {/* Hover reveals the detail: the close-up wipes up over the full look, or, without one, the look zooms in */}
-          <ProductImage
-            src={p.image}
-            alt={p.name}
-            loading="lazy"
-            className={`h-full w-full object-cover transition-transform duration-[1.4s] ease-couture ${
-              p.closeup
-                ? 'group-hover:scale-[1.04] group-focus-within:scale-[1.04]'
-                : 'origin-[50%_26%] group-hover:scale-[1.35] group-focus-within:scale-[1.35]'
-            } ${soldOut ? 'opacity-60' : ''}`}
-          />
-          {p.closeup && (
-            <>
-              <ProductImage
-                src={p.closeup}
-                alt=""
-                aria-hidden
-                className={`absolute inset-0 h-full w-full scale-[1.06] object-cover object-top transition-[clip-path,transform] duration-[900ms] ease-couture [clip-path:inset(100%_0_0_0)] group-hover:scale-100 group-hover:[clip-path:inset(0_0_0_0)] group-focus-within:scale-100 group-focus-within:[clip-path:inset(0_0_0_0)] ${
-                  soldOut ? 'opacity-60' : ''
-                }`}
-              />
-              <span
-                aria-hidden
-                className="absolute bottom-2 left-2 translate-y-1 bg-couture-ink/85 px-2 py-1 font-bodoni text-[12px] italic text-couture-bone opacity-0 backdrop-blur-sm transition duration-500 ease-couture group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-300 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-              >
-                The detail
-              </span>
-            </>
-          )}
-          <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5">
+          {/* Hover zooms toward the cursor and pans with it, so shoppers can study the handwork */}
+          <ZoomPhoto src={p.image} alt={p.name} className={soldOut ? 'opacity-60' : ''} />
+          <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5">
             {p.isNew && (
               <span className="bg-couture-gold px-2 py-1 font-manrope text-[9px] font-semibold uppercase tracking-[0.22em] text-couture-ink">
                 New
