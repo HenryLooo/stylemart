@@ -1,20 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { Heart, Plus } from 'lucide-react'
-import type { Product } from '../../shared/data/products'
+import { ProductImage } from '../../shared/catalog/ProductImage'
+import { isMadeToOrder, isSoldOut, type Product } from '../../shared/catalog/types'
 import { useCart } from '../../shared/cart'
 import { formatPrice } from '../../shared/format'
 import { focusRing, pillButton } from './tokens'
 
+const pillDisabled = `inline-flex w-full cursor-not-allowed items-center justify-center rounded-full border border-classic-line px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-classic-muted ${focusRing}`
+
 export function ProductCard({ product }: { product: Product }) {
   const [liked, setLiked] = useState(false)
+  // Brief "limit reached" note when the bag already holds every piece in stock
+  const [atLimit, setAtLimit] = useState(false)
   const add = useCart((s) => s.add)
   const { closeup } = product
+  const soldOut = isSoldOut(product)
+
+  useEffect(() => {
+    if (!atLimit) return
+    const t = setTimeout(() => setAtLimit(false), 1800)
+    return () => clearTimeout(t)
+  }, [atLimit])
 
   return (
     <article className="group/card flex h-full flex-col">
       <div className="relative aspect-[2/3] overflow-hidden bg-[#ececea]">
-        <img
+        <ProductImage
           src={product.image}
           alt={product.name}
           loading="lazy"
@@ -23,7 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
           }`}
         />
         {closeup && (
-          <img
+          <ProductImage
             src={closeup}
             alt=""
             aria-hidden
@@ -31,10 +43,17 @@ export function ProductCard({ product }: { product: Product }) {
             className="absolute inset-0 h-full w-full scale-[1.04] object-cover object-top opacity-0 transition duration-700 ease-out group-hover/card:scale-100 group-hover/card:opacity-100"
           />
         )}
-        {product.isNew && (
-          <span className="absolute left-2.5 top-2.5 bg-white px-2 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-classic-ink sm:left-3 sm:top-3">
-            New
-          </span>
+        {(product.isNew || soldOut) && (
+          <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
+            {product.isNew && (
+              <span className="bg-white px-2 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-classic-ink">New</span>
+            )}
+            {soldOut && (
+              <span className="bg-classic-charcoal px-2 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white">
+                Sold out
+              </span>
+            )}
+          </div>
         )}
         <motion.button
           type="button"
@@ -59,14 +78,30 @@ export function ProductCard({ product }: { product: Product }) {
           {formatPrice(product.price)}
         </p>
         <div className="mt-auto pt-3.5">
-          {product.price == null ? (
+          {isMadeToOrder(product) ? (
             <a href="#appointment" className={pillButton}>
               Book a Fitting
             </a>
+          ) : soldOut ? (
+            <button type="button" disabled className={pillDisabled}>
+              Sold out
+            </button>
           ) : (
-            <button type="button" onClick={() => add(product.id)} className={pillButton}>
-              <Plus className="size-3.5" strokeWidth={1.8} aria-hidden />
-              Quick Add
+            // One button throughout so keyboard focus survives the "limit reached" flash
+            <button
+              type="button"
+              onClick={() => atLimit || add(product.id) || setAtLimit(true)}
+              aria-live="polite"
+              className={atLimit ? pillDisabled : pillButton}
+            >
+              {atLimit ? (
+                'Limit reached'
+              ) : (
+                <>
+                  <Plus className="size-3.5" strokeWidth={1.8} aria-hidden />
+                  Quick Add
+                </>
+              )}
             </button>
           )}
         </div>

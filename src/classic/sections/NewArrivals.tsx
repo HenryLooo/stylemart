@@ -1,11 +1,10 @@
-import { products } from '../../shared/data/products'
+import { useActiveProducts } from '../../shared/catalog/store'
 import { ProductCard } from '../components/ProductCard'
 import { Rail } from '../components/Rail'
 import { Container, Reveal, SectionHeading } from '../components/ui'
 
-const arrivals = products.filter((p) => p.isNew)
-
 export default function NewArrivals() {
+  const arrivals = useActiveProducts().filter((p) => p.isNew)
   return (
     <section id="new-arrivals" aria-labelledby="new-title" className="scroll-mt-20 bg-classic-paper py-16 sm:py-24">
       <Container>

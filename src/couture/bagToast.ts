@@ -14,8 +14,12 @@ export const useBagToast = create<BagToastState>((set) => ({
   dismiss: () => set({ item: null }),
 }))
 
-/** Couture confirms adds with a toast instead of throwing the drawer over the page. */
+/**
+ * Couture confirms adds with a toast instead of throwing the drawer over the page.
+ * Returns false (and shows no toast) when the piece couldn't be added: sold out, or the bag already holds all the stock.
+ */
 export function addToBag(id: string) {
-  useCart.getState().add(id, { open: false })
-  useBagToast.getState().show(id)
+  const added = useCart.getState().add(id, { open: false })
+  if (added) useBagToast.getState().show(id)
+  return added
 }

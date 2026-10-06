@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { CircleArrowRight } from 'lucide-react'
-import { productById } from '../../shared/data/products'
-import type { Product } from '../../shared/data/products'
+import { useActiveProducts } from '../../shared/catalog/store'
+import { isSoldOut, type Collection, type Product } from '../../shared/catalog/types'
 import { ProductCard } from '../components/ProductCard'
 import { Container, Reveal, SectionHeading } from '../components/ui'
 import { ease, focusRing } from '../components/tokens'
-
-type Collection = Product['collection']
 
 // Tab labels as on the live site; values map to product.collection.
 const tabs: { label: string; value: Collection }[] = [
@@ -16,11 +14,35 @@ const tabs: { label: string; value: Collection }[] = [
   { label: 'Asian Women', value: 'Asian Woman' },
 ]
 
-const picks: Record<Collection, string[]> = {
-  // Only three lenghas in the catalogue: the fourth slot invites a bespoke order.
+// The house's preferred order within each tab, for pieces that were in the original catalogue
+const curated: Record<Collection, string[]> = {
   Lengha: ['p9', 'p8', 'p12'],
   Saree: ['p7', 'p14', 'p6', 'p2'],
   'Asian Woman': ['p11', 'p3', 'p5', 'p1'],
+}
+
+const MAX = 4
+const rank = (p: Product) => {
+  const i = curated[p.collection].indexOf(p.id)
+  return i < 0 ? Infinity : i
+}
+
+/**
+ * Up to four active pieces from the tab's collection. Sold-out pieces sink; the latest additions lead
+ * (so new stock shows up), then the curated order, then new-season and priced pieces ahead of made-to-order.
+ */
+function pick(products: Product[], collection: Collection) {
+  return products
+    .filter((p) => p.collection === collection)
+    .sort(
+      (a, b) =>
+        Number(isSoldOut(a)) - Number(isSoldOut(b)) ||
+        b.createdAt.localeCompare(a.createdAt) ||
+        rank(a) - rank(b) ||
+        Number(!!b.isNew) - Number(!!a.isNew) ||
+        Number(b.price != null) - Number(a.price != null),
+    )
+    .slice(0, MAX)
 }
 
 function BespokeTile() {
@@ -52,7 +74,8 @@ function BespokeTile() {
 
 export default function FeaturedCollection() {
   const [active, setActive] = useState<Collection>('Lengha')
-  const items = picks[active].map((id) => productById(id)).filter((p): p is Product => !!p)
+  const products = useActiveProducts()
+  const items = useMemo(() => pick(products, active), [products, active])
 
   return (
     <section id="featured" aria-labelledby="featured-title" className="scroll-mt-20 bg-white py-16 sm:py-24">
@@ -106,7 +129,8 @@ export default function FeaturedCollection() {
                   <ProductCard product={p} />
                 </li>
               ))}
-              {items.length < 4 && (
+              {/* A short tab ends with an invitation to have one made */}
+              {items.length < MAX && (
                 <li>
                   <BespokeTile />
                 </li>

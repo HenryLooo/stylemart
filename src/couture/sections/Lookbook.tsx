@@ -1,45 +1,27 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { products } from '../../shared/data/products'
+import { useActiveProducts } from '../../shared/catalog/store'
+import type { Product } from '../../shared/catalog/types'
 import { COLLECTION_PATH } from '../catalogue'
 import { Folio, btnLine, useIsDesktop } from '../ui'
-import Plate, { type Look } from './Plate'
+import Plate from './Plate'
 
-const looks: Look[] = [
-  {
-    id: 'p9',
-    details: ['Full-sleeve sequin blouse', 'Blush sequin lengha'],
-  },
-  {
-    id: 'p3',
-    details: ['Hand-worked Kashmiri gara sleeves', 'Teal-to-sapphire ombré silk'],
-  },
-  {
-    id: 'p11',
-    details: ['Hand-painted, gara-embroidered pallu', 'Champagne draped gown'],
-  },
-  {
-    id: 'p13',
-    details: ['Hand-embroidered lion-mane shoulder', 'SG60 edition Indo-Western tuxedo'],
-  },
-  {
-    id: 'p7',
-    details: ['Sculpted full-sleeve jacket', 'Printed silver saree gown'],
-  },
-  {
-    id: 'p2',
-    details: ['Embellished bustier', 'Liquid-metal drape'],
-  },
-  {
-    id: 'p5',
-    details: ['Sweetheart bodice', 'Threadwork skirt in petal pink'],
-  },
-  {
-    id: 'p6',
-    details: ['Structured beaded blouse', 'Pre-draped metallic saree'],
-  },
-]
+// The curated running order of looks (one product each); craft details come from the product itself
+const LOOK_IDS = ['p9', 'p3', 'p11', 'p13', 'p7', 'p2', 'p5', 'p6']
+
+const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve']
+const inWords = (n: number) => NUMBER_WORDS[n] ?? String(n)
+
+/** The looks still on sale (active), in curated order, plus the size of the whole active collection */
+function useLooks() {
+  const products = useActiveProducts()
+  const looks = useMemo(
+    () => LOOK_IDS.map((id) => products.find((p) => p.id === id)).filter((p): p is Product => !!p),
+    [products],
+  )
+  return { looks, total: products.length }
+}
 
 const breathers = {
   3: { src: '/media/runway-kl-shawl.webp', alt: 'A model in an embroidered shawl on the runway', caption: 'On the runway', pos: '50% 40%' },
@@ -49,43 +31,48 @@ const breathers = {
 export default function Lookbook() {
   const isDesktop = useIsDesktop()
   const reduced = useReducedMotion()
-  return isDesktop && !reduced ? <Horizontal /> : <Swipe />
+  const { looks, total } = useLooks()
+  if (looks.length === 0) return null
+  return isDesktop && !reduced ? <Horizontal looks={looks} total={total} /> : <Swipe looks={looks} total={total} />
 }
 
-function Intro({ compact = false }: { compact?: boolean }) {
+function Intro({ count, compact = false }: { count: number; compact?: boolean }) {
   return (
     <div className={compact ? '' : 'w-[30vw] max-w-[440px] shrink-0 self-center'}>
-      <Folio page="14" label={`The lookbook · ${looks.length} looks`} />
+      <Folio page="14" label={`The lookbook · ${count} ${count === 1 ? 'look' : 'looks'}`} />
       <h2 className="mt-6 font-bodoni text-[clamp(3.2rem,6.4vw,7rem)] font-normal leading-[0.92] tracking-[-0.02em] text-couture-bone">
         The
         <br />
         Lookbook
       </h2>
       <p className="mt-6 max-w-[34ch] font-manrope text-[14px] font-light leading-[1.75] text-couture-bone/75">
-        Eight looks from the atelier, from bridal lengha to the SG60 Lion Suit. Each is sold as a complete outfit. Open the + on any look for its details, price
+        {inWords(count)} {count === 1 ? 'look' : 'looks'} from the atelier, from bridal lengha to the SG60 Lion Suit. Each is sold as a complete outfit. Open the + on any look for its details, price
         and a way to make it yours.
       </p>
     </div>
   )
 }
 
-function Outro() {
+function Outro({ total }: { total: number }) {
   return (
     <div className="flex w-[78vw] max-w-[420px] shrink-0 flex-col justify-center self-center pr-[6vw] lg:w-[28vw]">
       <p className="font-bodoni text-[clamp(2.2rem,3.6vw,3.6rem)] leading-[1.02] text-couture-bone">
-        {products.length} pieces in the collection.
+        {total} {total === 1 ? 'piece' : 'pieces'} in the collection.
       </p>
       <p className="mt-4 max-w-[30ch] font-manrope text-[14px] font-light leading-relaxed text-couture-bone/70">
         Every piece can be altered to measure, and bridal pieces are made to order.
       </p>
       <Link to={COLLECTION_PATH} className={`${btnLine} mt-8 self-start`}>
-        View all {products.length} pieces <span aria-hidden>→</span>
+        View all {total} {total === 1 ? 'piece' : 'pieces'} <span aria-hidden>→</span>
       </Link>
     </div>
   )
 }
 
-function sequence(render: { look: (l: Look, i: number) => ReactNode; breather: (b: (typeof breathers)[number], i: number) => ReactNode }) {
+function sequence(
+  looks: Product[],
+  render: { look: (p: Product, i: number) => ReactNode; breather: (b: (typeof breathers)[number], i: number) => ReactNode },
+) {
   return looks.flatMap((l, i) => {
     const out = [render.look(l, i)]
     if (breathers[i + 1]) out.push(render.breather(breathers[i + 1], i + 1))
@@ -94,7 +81,7 @@ function sequence(render: { look: (l: Look, i: number) => ReactNode; breather: (
 }
 
 /** Desktop: vertical scroll drives a horizontal strip, pinned to the viewport. */
-function Horizontal() {
+function Horizontal({ looks, total }: { looks: Product[]; total: number }) {
   const section = useRef<HTMLElement>(null)
   const track = useRef<HTMLDivElement>(null)
   const [dist, setDist] = useState(0)
@@ -147,11 +134,11 @@ function Horizontal() {
             window.scrollTo({ top: top + want, behavior: 'auto' })
           }}
         >
-          <Intro />
-          {sequence({
+          <Intro count={looks.length} />
+          {sequence(looks, {
             look: (l, i) => (
               <div key={l.id} className="shrink-0 pt-[max(6.5rem,calc(50svh-min(40svh,27vw)*0.75-0.5rem))]">
-                <Plate look={l} index={i} className="w-[min(40svh,27vw)]" />
+                <Plate product={l} index={i} className="w-[min(40svh,27vw)]" />
               </div>
             ),
             breather: (b, i) => (
@@ -164,7 +151,7 @@ function Horizontal() {
               </figure>
             ),
           })}
-          <Outro />
+          <Outro total={total} />
         </motion.div>
       </div>
     </section>
@@ -172,11 +159,11 @@ function Horizontal() {
 }
 
 /** Mobile & reduced motion: a native swipe carousel with scroll-snap. */
-function Swipe() {
+function Swipe({ looks, total }: { looks: Product[]; total: number }) {
   return (
     <section id="lookbook" aria-label="The lookbook" className="relative bg-couture-ink py-20 lg:py-32">
       <div className="px-4 sm:px-6 lg:px-10">
-        <Intro compact />
+        <Intro count={looks.length} compact />
         <p className="mt-6 font-manrope text-[10px] font-semibold uppercase tracking-[0.28em] text-couture-gold">
           Swipe to browse <span aria-hidden>⟶</span>
         </p>
@@ -187,8 +174,8 @@ function Swipe() {
         role="region"
         aria-label="Looks, scroll horizontally"
       >
-        {sequence({
-          look: (l, i) => <Plate key={l.id} look={l} index={i} className="w-[78vw] max-w-[360px] snap-start" />,
+        {sequence(looks, {
+          look: (l, i) => <Plate key={l.id} product={l} index={i} className="w-[78vw] max-w-[360px] snap-start" />,
           breather: (b, i) => (
             <figure key={`b${i}`} className="relative w-[86vw] max-w-[520px] shrink-0 snap-start self-start overflow-hidden">
               <img src={b.src} alt={b.alt} loading="lazy" className="aspect-[4/5] w-full object-cover" style={{ objectPosition: b.pos }} />
@@ -198,7 +185,7 @@ function Swipe() {
             </figure>
           ),
         })}
-        <Outro />
+        <Outro total={total} />
       </div>
     </section>
   )

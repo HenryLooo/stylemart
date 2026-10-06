@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
 import { cartCount, cartSubtotal, useCart } from '../../shared/cart'
-import { productById } from '../../shared/data/products'
+import { ProductImage } from '../../shared/catalog/ProductImage'
+import { useCatalog, useProduct } from '../../shared/catalog/store'
+import { isLowStock } from '../../shared/catalog/types'
 import { formatSGD } from '../../shared/format'
 import { ease, focusRing } from './tokens'
 import { useEscape, useLockBodyScroll } from './useLockBodyScroll'
 
-const qtyBtn = `grid size-8 place-items-center text-classic-ink transition-colors hover:text-classic-gold-dark disabled:opacity-30 ${focusRing}`
+const qtyBtn = `grid size-8 place-items-center text-classic-ink transition-colors hover:text-classic-gold-dark disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-classic-ink ${focusRing}`
 
 export default function CartDrawer() {
   const { lines, isOpen, close, setQty, remove } = useCart()
@@ -24,6 +26,8 @@ export default function CartDrawer() {
   }, [notice])
 
   const count = cartCount(lines)
+  // Re-render on catalog edits so prices and the subtotal stay current
+  useCatalog((s) => s.products)
 
   return (
     <AnimatePresence>
@@ -74,63 +78,15 @@ export default function CartDrawer() {
             ) : (
               <ul className="flex-1 divide-y divide-classic-line overflow-y-auto px-5">
                 <AnimatePresence initial={false}>
-                  {lines.map((line) => {
-                    const p = productById(line.id)
-                    if (!p) return null
-                    return (
-                      <motion.li
-                        key={line.id}
-                        layout
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.35, ease }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex gap-4 py-5">
-                          <img src={p.image} alt="" className="h-28 w-[75px] shrink-0 bg-[#ececea] object-cover object-top" />
-                          <div className="flex min-w-0 flex-1 flex-col">
-                            <div className="flex items-start justify-between gap-3">
-                              <p className="font-playfair text-[15px] leading-snug">{p.name}</p>
-                              <button
-                                type="button"
-                                onClick={() => remove(line.id)}
-                                aria-label={`Remove ${p.name}`}
-                                className={`-mr-1.5 -mt-1 grid size-7 shrink-0 place-items-center text-classic-muted hover:text-classic-ink ${focusRing}`}
-                              >
-                                <X className="size-4" strokeWidth={1.5} />
-                              </button>
-                            </div>
-                            <p className="mt-1 text-xs text-classic-muted">{p.category}</p>
-                            <div className="mt-auto flex items-center justify-between pt-3">
-                              <div className="flex items-center border border-classic-line">
-                                <button
-                                  type="button"
-                                  onClick={() => setQty(line.id, line.qty - 1)}
-                                  aria-label={`Decrease quantity of ${p.name}`}
-                                  className={qtyBtn}
-                                >
-                                  <Minus className="size-3.5" />
-                                </button>
-                                <span className="w-7 text-center text-sm tabular-nums" aria-live="polite">
-                                  {line.qty}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setQty(line.id, line.qty + 1)}
-                                  aria-label={`Increase quantity of ${p.name}`}
-                                  className={qtyBtn}
-                                >
-                                  <Plus className="size-3.5" />
-                                </button>
-                              </div>
-                              <p className="text-sm tabular-nums">{formatSGD((p.price ?? 0) * line.qty)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.li>
-                    )
-                  })}
+                  {lines.map((line) => (
+                    <BagLine
+                      key={line.id}
+                      id={line.id}
+                      qty={line.qty}
+                      onQty={(q) => setQty(line.id, q)}
+                      onRemove={() => remove(line.id)}
+                    />
+                  ))}
                 </AnimatePresence>
               </ul>
             )}
@@ -168,5 +124,63 @@ export default function CartDrawer() {
         </div>
       )}
     </AnimatePresence>
+  )
+}
+
+function BagLine({ id, qty, onQty, onRemove }: { id: string; qty: number; onQty: (q: number) => void; onRemove: () => void }) {
+  const p = useProduct(id)
+  if (!p) return null
+  const atLimit = qty >= p.stock
+  return (
+    <motion.li
+      layout
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.35, ease }}
+      className="overflow-hidden"
+    >
+      <div className="flex gap-4 py-5">
+        <ProductImage src={p.image} alt="" className="h-28 w-[75px] shrink-0 bg-[#ececea] object-cover object-top" />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-playfair text-[15px] leading-snug">{p.name}</p>
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${p.name}`}
+              className={`-mr-1.5 -mt-1 grid size-7 shrink-0 place-items-center text-classic-muted hover:text-classic-ink ${focusRing}`}
+            >
+              <X className="size-4" strokeWidth={1.5} />
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-classic-muted">
+            {p.category}
+            {isLowStock(p) && <span className="ml-2 text-classic-gold-dark">· Only {p.stock} left</span>}
+          </p>
+          <div className="mt-auto flex items-center justify-between pt-3">
+            <div className="flex items-center border border-classic-line">
+              <button type="button" onClick={() => onQty(qty - 1)} aria-label={`Decrease quantity of ${p.name}`} className={qtyBtn}>
+                <Minus className="size-3.5" />
+              </button>
+              <span className="w-7 text-center text-sm tabular-nums" aria-live="polite">
+                {qty}
+              </span>
+              <button
+                type="button"
+                onClick={() => onQty(qty + 1)}
+                disabled={atLimit}
+                aria-label={atLimit ? `No more ${p.name} in stock` : `Increase quantity of ${p.name}`}
+                title={atLimit ? 'That’s all we have in stock' : undefined}
+                className={qtyBtn}
+              >
+                <Plus className="size-3.5" />
+              </button>
+            </div>
+            <p className="text-sm tabular-nums">{formatSGD((p.price ?? 0) * qty)}</p>
+          </div>
+        </div>
+      </div>
+    </motion.li>
   )
 }

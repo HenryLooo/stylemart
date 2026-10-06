@@ -1,8 +1,10 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
-import { products, type Product } from '../shared/data/products'
+import { ProductImage } from '../shared/catalog/ProductImage'
+import { useActiveProducts } from '../shared/catalog/store'
+import { isMadeToOrder, isSoldOut, type Product } from '../shared/catalog/types'
 import { formatPrice } from '../shared/format'
 import CoutureShell from './CoutureShell'
 import AddToBagButton from './sections/AddToBagButton'
@@ -14,7 +16,8 @@ export default function CollectionPage() {
   const [params, setParams] = useSearchParams()
   const active = filterBySlug(params.get('c'))
   const sort = (sorts.find((s) => s.value === params.get('sort'))?.value ?? 'featured') as SortValue
-  const list = sortProducts(products.filter(active.match), sort)
+  const products = useActiveProducts()
+  const list = useMemo(() => sortProducts(products.filter(active.match), sort), [products, active, sort])
   const gridTop = useRef<HTMLDivElement>(null)
 
   const update = (next: { c?: string; sort?: SortValue }) => {
@@ -94,7 +97,7 @@ export default function CollectionPage() {
                     }`}
                   >
                     {f.slug === 'all' ? 'All' : f.name}
-                    <sup className="ml-1 font-bodoni text-[11px] normal-case italic tracking-normal text-couture-gold">{countIn(f)}</sup>
+                    <sup className="ml-1 font-bodoni text-[11px] normal-case italic tracking-normal text-couture-gold">{countIn(f, products)}</sup>
                     {on && (
                       <motion.span
                         layoutId="collection-filter"
@@ -192,7 +195,8 @@ export default function CollectionPage() {
 }
 
 function Card({ p }: { p: Product }) {
-  const madeToOrder = p.price == null
+  const madeToOrder = isMadeToOrder(p)
+  const soldOut = isSoldOut(p)
   return (
     <motion.li
       layout
@@ -204,11 +208,11 @@ function Card({ p }: { p: Product }) {
     >
       <div className="border border-couture-gold/35 bg-couture-ink-2 p-1.5 transition-colors duration-500 group-hover:border-couture-gold/70">
         <div className="relative aspect-[2/3] overflow-hidden bg-[#e9e7e4]">
-          <img
+          <ProductImage
             src={p.image}
             alt={p.name}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-[1.4s] ease-couture group-hover:scale-[1.04]"
+            className={`h-full w-full object-cover transition-transform duration-[1.4s] ease-couture group-hover:scale-[1.04] ${soldOut ? 'opacity-60' : ''}`}
           />
           <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5">
             {p.isNew && (
@@ -219,6 +223,11 @@ function Card({ p }: { p: Product }) {
             {madeToOrder && (
               <span className="bg-couture-ink/85 px-2 py-1 font-manrope text-[9px] font-semibold uppercase tracking-[0.22em] text-couture-bone backdrop-blur-sm">
                 Made to order
+              </span>
+            )}
+            {soldOut && (
+              <span className="bg-couture-bone px-2 py-1 font-manrope text-[9px] font-semibold uppercase tracking-[0.22em] text-couture-ink">
+                Sold out
               </span>
             )}
           </div>

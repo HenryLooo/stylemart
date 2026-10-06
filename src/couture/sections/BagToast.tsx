@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from 'lucide-react'
 import { cartCount, useCart } from '../../shared/cart'
-import { productById } from '../../shared/data/products'
+import { ProductImage } from '../../shared/catalog/ProductImage'
+import { useProduct } from '../../shared/catalog/store'
 import { formatPrice } from '../../shared/format'
 import { useBagToast } from '../bagToast'
 import { EASE } from '../ui'
@@ -30,7 +31,7 @@ export default function BagToast() {
 }
 
 function Toast({ id }: { id: string }) {
-  const p = productById(id)!
+  const p = useProduct(id)
   const dismiss = useBagToast((s) => s.dismiss)
   const openCart = useCart((s) => s.open)
   const count = useCart((s) => cartCount(s.lines))
@@ -65,6 +66,8 @@ function Toast({ id }: { id: string }) {
     }
   }, [paused, dismiss])
 
+  if (!p) return null
+
   return (
     <motion.div
       role="status"
@@ -80,7 +83,7 @@ function Toast({ id }: { id: string }) {
     >
       <div className="flex gap-4 p-4">
         <div className="w-16 shrink-0 border border-couture-gold/40 p-1">
-          <img src={p.image} alt="" className="aspect-[2/3] w-full bg-[#e9e7e4] object-cover" />
+          <ProductImage src={p.image} alt="" className="aspect-[2/3] w-full bg-[#e9e7e4] object-cover" />
         </div>
         <div className="min-w-0 flex-1 pr-6">
           <p className="flex items-center gap-2 font-manrope text-[10px] font-semibold uppercase tracking-[0.26em] text-couture-gold">

@@ -3,7 +3,9 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Minus, Plus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cartCount, cartSubtotal, useCart } from '../../shared/cart'
-import { productById } from '../../shared/data/products'
+import { ProductImage } from '../../shared/catalog/ProductImage'
+import { useCatalog, useProduct } from '../../shared/catalog/store'
+import { isLowStock } from '../../shared/catalog/types'
 import { formatSGD } from '../../shared/format'
 import { COLLECTION_PATH } from '../catalogue'
 import { EASE, btnLine, btnSolid, useBodyLock, useEscape } from '../ui'
@@ -14,6 +16,8 @@ export default function CartDrawer() {
   const [demoNote, setDemoNote] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const count = cartCount(lines)
+  // Re-render on catalog edits so prices and the subtotal stay current
+  useCatalog((s) => s.products)
   useBodyLock(isOpen)
   useEscape(isOpen, close)
 
@@ -86,65 +90,9 @@ export default function CartDrawer() {
               <>
                 <ul className="flex-1 overflow-y-auto px-6">
                   <AnimatePresence initial={false}>
-                    {lines.map((l) => {
-                      const p = productById(l.id)
-                      if (!p) return null
-                      return (
-                        <motion.li
-                          key={l.id}
-                          layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.4, ease: EASE }}
-                          className="overflow-hidden border-b border-couture-gold/20"
-                        >
-                          <div className="flex gap-4 py-5">
-                            <div className="shrink-0 border border-couture-gold/40 p-1">
-                              <img src={p.image} alt="" className="h-28 w-[4.7rem] object-cover" />
-                            </div>
-                            <div className="flex min-w-0 flex-1 flex-col">
-                              <div className="flex items-start justify-between gap-3">
-                                <p className="font-bodoni text-[17px] leading-snug">{p.name}</p>
-                                <button
-                                  type="button"
-                                  onClick={() => remove(l.id)}
-                                  aria-label={`Remove ${p.name}`}
-                                  className="-mr-1 -mt-1 grid size-7 shrink-0 place-items-center text-couture-mute hover:text-couture-bone"
-                                >
-                                  <X className="size-3.5" strokeWidth={1.4} />
-                                </button>
-                              </div>
-                              <p className="mt-1 font-manrope text-[11px] text-couture-mute">{p.category}</p>
-                              <div className="mt-auto flex items-center justify-between pt-3">
-                                <div className="flex items-center border border-couture-gold/40">
-                                  <button
-                                    type="button"
-                                    onClick={() => setQty(l.id, l.qty - 1)}
-                                    aria-label={`One fewer ${p.name}`}
-                                    className="grid size-8 place-items-center hover:text-couture-gold-light"
-                                  >
-                                    <Minus className="size-3" strokeWidth={1.5} />
-                                  </button>
-                                  <span className="w-7 text-center font-manrope text-[13px]" aria-label={`Quantity ${l.qty}`}>
-                                    {l.qty}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setQty(l.id, l.qty + 1)}
-                                    aria-label={`One more ${p.name}`}
-                                    className="grid size-8 place-items-center hover:text-couture-gold-light"
-                                  >
-                                    <Plus className="size-3" strokeWidth={1.5} />
-                                  </button>
-                                </div>
-                                <span className="font-bodoni text-lg text-couture-gold-light">{formatSGD((p.price ?? 0) * l.qty)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.li>
-                      )
-                    })}
+                    {lines.map((l) => (
+                      <BagLine key={l.id} id={l.id} qty={l.qty} onQty={(q) => setQty(l.id, q)} onRemove={() => remove(l.id)} />
+                    ))}
                   </AnimatePresence>
                 </ul>
 
@@ -167,5 +115,70 @@ export default function CartDrawer() {
         </div>
       )}
     </AnimatePresence>
+  )
+}
+
+function BagLine({ id, qty, onQty, onRemove }: { id: string; qty: number; onQty: (q: number) => void; onRemove: () => void }) {
+  const p = useProduct(id)
+  if (!p) return null
+  const atLimit = qty >= p.stock
+  return (
+    <motion.li
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.4, ease: EASE }}
+      className="overflow-hidden border-b border-couture-gold/20"
+    >
+      <div className="flex gap-4 py-5">
+        <div className="shrink-0 border border-couture-gold/40 p-1">
+          <ProductImage src={p.image} alt="" className="h-28 w-[4.7rem] object-cover" />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-bodoni text-[17px] leading-snug">{p.name}</p>
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${p.name}`}
+              className="-mr-1 -mt-1 grid size-7 shrink-0 place-items-center text-couture-mute hover:text-couture-bone"
+            >
+              <X className="size-3.5" strokeWidth={1.4} />
+            </button>
+          </div>
+          <p className="mt-1 font-manrope text-[11px] text-couture-mute">
+            {p.category}
+            {isLowStock(p) && <span className="ml-2 italic text-couture-gold-light">Only {p.stock} left</span>}
+          </p>
+          <div className="mt-auto flex items-center justify-between pt-3">
+            <div className="flex items-center border border-couture-gold/40">
+              <button
+                type="button"
+                onClick={() => onQty(qty - 1)}
+                aria-label={`One fewer ${p.name}`}
+                className="grid size-8 place-items-center hover:text-couture-gold-light"
+              >
+                <Minus className="size-3" strokeWidth={1.5} />
+              </button>
+              <span className="w-7 text-center font-manrope text-[13px]" aria-label={`Quantity ${qty}`}>
+                {qty}
+              </span>
+              <button
+                type="button"
+                onClick={() => onQty(qty + 1)}
+                disabled={atLimit}
+                aria-label={atLimit ? `No more ${p.name} in stock` : `One more ${p.name}`}
+                title={atLimit ? 'That’s all we have in stock' : undefined}
+                className="grid size-8 place-items-center hover:text-couture-gold-light disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-inherit"
+              >
+                <Plus className="size-3" strokeWidth={1.5} />
+              </button>
+            </div>
+            <span className="font-bodoni text-lg text-couture-gold-light">{formatSGD((p.price ?? 0) * qty)}</span>
+          </div>
+        </div>
+      </div>
+    </motion.li>
   )
 }

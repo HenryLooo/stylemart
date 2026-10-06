@@ -1,6 +1,7 @@
 import { useRef, useState, type MouseEvent } from 'react'
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react'
 import { Link } from 'react-router-dom'
+import { useActiveProducts } from '../../shared/catalog/store'
 import { collectionHref, countIn, filterBySlug } from '../catalogue'
 import { EASE, Folio, useMediaQuery } from '../ui'
 
@@ -41,6 +42,7 @@ export default function CollectionsIndex() {
 function HoverList() {
   const ref = useRef<HTMLUListElement>(null)
   const [active, setActive] = useState<number | null>(null)
+  const products = useActiveProducts()
   const reduced = useReducedMotion()
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
@@ -107,7 +109,7 @@ function HoverList() {
                 <span className="hidden font-manrope text-[12px] text-couture-mute xl:inline">{r.line}</span>
               </span>
               <span className="font-manrope text-[11px] font-semibold uppercase tracking-[0.24em] text-couture-gold-light">
-                {countLabel(countIn(f))} <span aria-hidden>→</span>
+                {countLabel(countIn(f, products))} <span aria-hidden>→</span>
               </span>
             </Link>
           </li>
@@ -118,6 +120,7 @@ function HoverList() {
 }
 
 function Cards() {
+  const products = useActiveProducts()
   return (
     <ul className="mt-12 grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5">
       {rows.map((r, i) => (
@@ -135,7 +138,7 @@ function Cards() {
             <p className="mt-3 font-bodoni text-sm italic text-couture-gold">{roman[i]}.</p>
             <p className="font-bodoni text-[1.45rem] leading-tight text-couture-bone">{filterBySlug(r.slug).name}</p>
             <p className="mt-1 font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-mute">
-              {countLabel(countIn(filterBySlug(r.slug)))} <span aria-hidden>→</span>
+              {countLabel(countIn(filterBySlug(r.slug), products))} <span aria-hidden>→</span>
             </p>
           </Link>
         </li>

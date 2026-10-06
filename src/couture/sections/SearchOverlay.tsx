@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
-import { products } from '../../shared/data/products'
-import { addToBag } from '../bagToast'
+import { ProductImage } from '../../shared/catalog/ProductImage'
+import { useActiveProducts } from '../../shared/catalog/store'
+import { isMadeToOrder } from '../../shared/catalog/types'
+import AddToBagButton from './AddToBagButton'
 import { formatPrice } from '../../shared/format'
 import { EASE, useBodyLock, useEscape, whatsappLink } from '../ui'
 
@@ -13,13 +15,14 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   useBodyLock(open)
   useEscape(open, onClose)
 
+  const products = useActiveProducts()
   const results = useMemo(() => {
     const t = q.trim().toLowerCase()
     if (!t) return products.filter((p) => p.isNew).slice(0, 4)
     return products.filter((p) =>
       [p.name, p.category, p.collection, p.note].some((s) => s.toLowerCase().includes(t)),
     )
-  }, [q])
+  }, [q, products])
 
   return (
     <AnimatePresence>
@@ -83,21 +86,17 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
               <ul className="mt-4 grid gap-x-6 sm:grid-cols-2">
                 {results.map((p) => (
                   <li key={p.id} className="flex gap-4 border-t border-couture-gold/15 py-4">
-                    <img src={p.image} alt="" className="h-24 w-16 shrink-0 object-cover" loading="lazy" />
+                    <ProductImage src={p.image} alt="" className="h-24 w-16 shrink-0 object-cover" loading="lazy" />
                     <div className="min-w-0 flex-1">
                       <p className="font-bodoni text-lg leading-snug">{p.name}</p>
                       <p className="mt-1 font-manrope text-xs text-couture-mute">{formatPrice(p.price)}</p>
-                      {p.price != null ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onClose()
-                            addToBag(p.id)
-                          }}
+                      {!isMadeToOrder(p) ? (
+                        // Closes search once the piece is in the bag; the toast confirms it
+                        <AddToBagButton
+                          id={p.id}
+                          onAdded={onClose}
                           className="mt-2 font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-gold hover:text-couture-gold-light"
-                        >
-                          Add to bag
-                        </button>
+                        />
                       ) : (
                         <a
                           href={whatsappLink(`Hello Stylemart, I'd like to book a fitting for ${p.name}.`)}
