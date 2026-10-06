@@ -62,6 +62,21 @@ export default function PitchIndex() {
           </motion.div>
         ))}
       </div>
+
+      <motion.p
+        className="mx-auto mt-8 max-w-7xl text-center font-manrope text-sm text-couture-bone/60"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.8 }}
+      >
+        Behind both concepts:{' '}
+        <Link
+          to="/admin"
+          className="font-semibold text-couture-bone underline decoration-couture-gold/60 underline-offset-4 transition-colors hover:text-couture-gold-light hover:decoration-couture-gold"
+        >
+          manage products and stock in the admin (demo)
+        </Link>
+      </motion.p>
     </main>
   )
 }

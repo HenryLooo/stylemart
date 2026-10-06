@@ -26,6 +26,16 @@
   --color-couture-mute: #9a9184;
 
   --ease-couture: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* In-house admin (light working tool; gold reserved for primary actions and focus) */
+  --color-admin-ink: #1a1a1a;
+  --color-admin-mute: #6b6b6b;
+  --color-admin-line: #ececec;
+  --color-admin-line-strong: #d9d9d9;
+  --color-admin-canvas: #f7f7f6;
+  --color-admin-gold-hover: #a8854b;
+  --color-admin-gold-deep: #7f612f;
+  --color-admin-gold-wash: #f6efe2;
 }
 
 html {

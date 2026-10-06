@@ -3,7 +3,8 @@ import { NavLink, useLocation } from 'react-router-dom'
 /** Floating pill for presenting: flip between the two concepts. */
 export default function MockupSwitcher() {
   const { pathname } = useLocation()
-  if (pathname === '/') return null
+  // Hidden on the pitch index and inside the in-house admin
+  if (pathname === '/' || pathname === '/admin' || pathname.startsWith('/admin/')) return null
 
   const link = ({ isActive }: { isActive: boolean }) =>
     `rounded-full px-3.5 py-1.5 transition-colors ${
