@@ -6,7 +6,7 @@ export default function Designer() {
   return (
     <section id="designer" className="relative bg-couture-ink px-4 pb-24 pt-8 sm:px-6 lg:px-10 lg:pb-40">
       <div className="mx-auto grid max-w-[1400px] items-center gap-y-12 lg:grid-cols-12 lg:gap-x-10">
-        {/* Portrait: the grey studio shot is set into an oxblood ground, tinted by luminosity */}
+        {/* Portrait: true colour; a soft ink vignette blends the grey studio backdrop into the page */}
         <motion.figure
           className="relative lg:col-span-6"
           initial={{ clipPath: 'inset(12% 0% 12% 0%)', opacity: 0.4 }}
@@ -14,20 +14,18 @@ export default function Designer() {
           viewport={{ once: true, margin: '0px 0px -15% 0px' }}
           transition={{ duration: 1.4, ease: EASE }}
         >
-          <div className="group relative aspect-[4/3.4] overflow-hidden bg-couture-oxblood">
+          <div className="group relative aspect-[4/3.4] overflow-hidden bg-couture-ink-2">
             <img
               src="/media/kavita-portrait.webp"
               alt="Kavita Thulasidas, founder and designer of Stylemart"
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover object-[30%_30%] mix-blend-luminosity brightness-[0.4] contrast-[1.6] transition-opacity duration-1000 ease-couture"
+              className="absolute inset-0 h-full w-full object-cover object-[30%_30%] transition-transform duration-[1.6s] ease-couture group-hover:scale-[1.03]"
             />
-            <img
-              src="/media/kavita-portrait.webp"
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover object-[30%_30%] opacity-0 transition-opacity duration-1000 ease-couture group-hover:opacity-100"
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_45%_35%,transparent_45%,rgba(14,12,10,0.55)_100%)]"
             />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-couture-ink/70 via-couture-oxblood/10 to-transparent" />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-couture-ink/75 via-transparent to-transparent" />
             <div aria-hidden className="pointer-events-none absolute inset-3 border border-couture-gold/50 sm:inset-4" />
             <p className="absolute bottom-6 left-7 font-bodoni text-sm italic text-couture-bone/90 sm:bottom-8 sm:left-9">
               Kavita Thulasidas, founder and designer
