@@ -63,13 +63,13 @@ export default function Hero() {
         </motion.p>
 
         <div className="relative">
-          <h1 className="font-bodoni font-normal uppercase leading-[0.84] tracking-[-0.015em] text-couture-bone">
+          <h1 className="font-bodoni font-bold uppercase leading-[0.84] tracking-[-0.015em] text-couture-bone">
             <span className="sr-only">Kavita Thulasidas</span>
             <span aria-hidden>
-              <MaskLine delay={0.35} duration={1.4} className="text-[14vw] lg:text-[14.2vw]">
+              <MaskLine delay={0.35} duration={1.4} className="text-[13.1vw] lg:text-[13.3vw]">
                 Kavita
               </MaskLine>
-              <MaskLine delay={0.5} duration={1.4} className="text-[14vw] lg:text-[14.2vw]">
+              <MaskLine delay={0.5} duration={1.4} className="text-[13.1vw] lg:text-[13.3vw]">
                 Thulasidas
               </MaskLine>
             </span>
