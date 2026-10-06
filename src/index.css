@@ -6,6 +6,8 @@
   --font-poppins: 'Poppins', system-ui, sans-serif;
   --font-bodoni: 'Bodoni Moda', 'Didot', Georgia, serif;
   --font-manrope: 'Manrope', system-ui, sans-serif;
+  /* Couture hero name: a Didone with sturdier hairlines, legible over photography */
+  --font-prata: 'Prata', 'Bodoni Moda', Georgia, serif;
 
   /* Mockup 1: Classic (faithful to the live site) */
   --color-classic-ink: #2b2b2b;
