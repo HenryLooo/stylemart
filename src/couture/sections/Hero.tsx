@@ -63,19 +63,18 @@ export default function Hero() {
         </motion.p>
 
         <div className="relative">
-          {/* Bodoni at a lower optical size: the display cut's hairlines vanish over the photograph */}
-          <h1 className="font-bodoni font-normal uppercase leading-[0.86] tracking-[-0.01em] text-couture-bone [font-variation-settings:'opsz'_28]">
+          <h1 className="font-bodoni font-normal uppercase leading-[0.84] tracking-[-0.015em] text-couture-bone">
             <span className="sr-only">Kavita Thulasidas</span>
             <span aria-hidden>
-              <MaskLine delay={0.35} duration={1.4} className="pt-[0.14em] text-[14vw] lg:text-[14.2vw]">
+              <MaskLine delay={0.35} duration={1.4} className="text-[14vw] lg:text-[14.2vw]">
                 Kavita
               </MaskLine>
-              <MaskLine delay={0.5} duration={1.4} className="-mt-[0.14em] pt-[0.14em] text-[14vw] lg:text-[14.2vw]">
+              <MaskLine delay={0.5} duration={1.4} className="text-[14vw] lg:text-[14.2vw]">
                 Thulasidas
               </MaskLine>
             </span>
           </h1>
-          <motion.div {...fadeIn(1.5)} className="absolute right-0 top-[2.45vw] hidden max-w-sm lg:block">
+          <motion.div {...fadeIn(1.5)} className="absolute right-0 top-[0.6vw] hidden max-w-sm lg:block">
             <HeroCopy />
           </motion.div>
         </div>
