@@ -2,17 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
 import { brand } from '../../shared/data/story'
-import { EASE, ISSUE, scrollToId, useBodyLock, useEscape } from '../ui'
+import { COLLECTION_PATH, collectionHref } from '../catalogue'
+import { EASE, ISSUE, useBodyLock, useEscape, useGo } from '../ui'
 
 /** The menu is set as the issue's contents page: page number, title, a line of what's there. */
 export const contents = [
-  { label: 'Collections', id: 'collections', page: '24', line: 'Lengha, saree, gown, menswear', image: '/media/editorial-trio.webp', pos: '50% 30%' },
-  { label: 'Bridal', id: 'lookbook', page: '14', line: 'The lookbook, eight looks to shop', image: '/media/editorial-bride-red.webp', pos: '28% 40%' },
-  { label: 'Asian Woman', id: 'designer', page: '04', line: 'Kavita’s own label, since 2004', image: '/media/editorial-gramophone.webp', pos: '55% 40%' },
-  { label: 'The Atelier', id: 'atelier', page: '28', line: 'Bespoke, made to measure', image: '/media/runway-garden-1.webp', pos: '50% 50%' },
-  { label: 'Her Story', id: 'story', page: '06', line: 'Five chapters, 1999 to today', image: '/media/kavita-runway-bow.webp', pos: '40% 40%' },
-  { label: 'Press', id: 'press', page: '32', line: 'In print and on the runway', image: '/media/press-kavita-feature.webp', pos: '50% 20%' },
-  { label: 'Contact', id: 'visit', page: '40', line: '151 Selegie Road', image: '/media/store-interior.webp', pos: '50% 50%' },
+  { label: 'The Collection', href: COLLECTION_PATH, page: '44', line: 'Every piece, ready to shop', image: '/media/editorial-trio.webp', pos: '50% 30%' },
+  { label: 'Lookbook', href: '/couture#lookbook', page: '14', line: 'Eight looks, styled', image: '/media/runway-kl-couple.webp', pos: '50% 40%' },
+  { label: 'Bridal', href: collectionHref('bridal-lengha'), page: '46', line: 'Lengha, made to measure', image: '/media/editorial-bride-red.webp', pos: '28% 40%' },
+  { label: 'Asian Woman', href: collectionHref('asian-woman'), page: '48', line: 'Kavita’s own label, since 2004', image: '/media/editorial-gramophone.webp', pos: '55% 40%' },
+  { label: 'Her Story', href: '/couture#story', page: '06', line: 'Five chapters, 1999 to today', image: '/media/kavita-runway-bow.webp', pos: '40% 40%' },
+  { label: 'The Atelier', href: '/couture#atelier', page: '28', line: 'Bespoke, made to measure', image: '/media/runway-garden-1.webp', pos: '50% 50%' },
+  { label: 'Press', href: '/couture#press', page: '32', line: 'In print and on the runway', image: '/media/press-kavita-feature.webp', pos: '50% 20%' },
+  { label: 'Contact', href: '/couture#visit', page: '40', line: '151 Selegie Road', image: '/media/store-interior.webp', pos: '50% 50%' },
 ]
 
 export default function MenuOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -28,10 +30,11 @@ export default function MenuOverlay({ open, onClose }: { open: boolean; onClose:
     }
   }, [open])
 
-  const go = (id: string) => {
+  const follow = useGo()
+  const go = (href: string) => {
     onClose()
     // Let the body unlock before scrolling
-    requestAnimationFrame(() => requestAnimationFrame(() => scrollToId(id)))
+    requestAnimationFrame(() => requestAnimationFrame(() => follow(href)))
   }
 
   return (
@@ -70,10 +73,10 @@ export default function MenuOverlay({ open, onClose }: { open: boolean; onClose:
                 {contents.map((c, i) => (
                   <li key={c.label} className="border-t border-couture-gold/20 last:border-b">
                     <a
-                      href={`#${c.id}`}
+                      href={c.href}
                       onClick={(e) => {
                         e.preventDefault()
-                        go(c.id)
+                        go(c.href)
                       }}
                       onMouseEnter={() => setHover(i)}
                       onFocus={() => setHover(i)}

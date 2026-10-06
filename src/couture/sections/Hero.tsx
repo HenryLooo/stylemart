@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
+import { Link } from 'react-router-dom'
+import { COLLECTION_PATH } from '../catalogue'
 import { EASE, ISSUE, MaskLine, btnLine, btnSolid, scrollToId } from '../ui'
 
 export default function Hero() {
@@ -109,16 +111,9 @@ function HeroCopy() {
         Bridal and couture from Singapore, designed by Kavita Thulasidas and made to measure on Selegie Road.
       </p>
       <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-4">
-        <a
-          href="#lookbook"
-          onClick={(e) => {
-            e.preventDefault()
-            scrollToId('lookbook')
-          }}
-          className={btnSolid}
-        >
+        <Link to={COLLECTION_PATH} className={btnSolid}>
           Shop the Collection
-        </a>
+        </Link>
         <a
           href="#designer"
           onClick={(e) => {

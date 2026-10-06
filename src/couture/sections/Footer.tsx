@@ -1,8 +1,9 @@
 import { brand } from '../../shared/data/story'
-import { ISSUE, scrollToId } from '../ui'
+import { ISSUE, useGo } from '../ui'
 import { contents } from './MenuOverlay'
 
 export default function Footer() {
+  const go = useGo()
   return (
     <footer className="relative overflow-hidden bg-couture-ink px-4 pb-20 pt-20 text-couture-bone sm:px-6 lg:px-10 lg:pt-28">
       <div className="mx-auto grid max-w-[1400px] gap-10 border-b border-couture-gold/25 pb-12 sm:grid-cols-2 lg:grid-cols-12">
@@ -17,10 +18,10 @@ export default function Footer() {
             {contents.map((c) => (
               <li key={c.label}>
                 <a
-                  href={`#${c.id}`}
+                  href={c.href}
                   onClick={(e) => {
                     e.preventDefault()
-                    scrollToId(c.id)
+                    go(c.href)
                   }}
                   className="font-manrope text-[13px] text-couture-bone/80 transition-colors hover:text-couture-gold-light"
                 >

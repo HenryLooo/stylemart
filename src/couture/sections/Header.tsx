@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
 import { Search } from 'lucide-react'
 import { cartCount, useCart } from '../../shared/cart'
-import { scrollToId } from '../ui'
+import { useGo } from '../ui'
 
 export default function Header({ onMenu, onSearch }: { onMenu: () => void; onSearch: () => void }) {
   const { scrollY } = useScroll()
@@ -10,6 +10,7 @@ export default function Header({ onMenu, onSearch }: { onMenu: () => void; onSea
   useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 48))
   const count = useCart((s) => cartCount(s.lines))
   const openCart = useCart((s) => s.open)
+  const go = useGo()
 
   return (
     <header
@@ -37,13 +38,13 @@ export default function Header({ onMenu, onSearch }: { onMenu: () => void; onSea
         </div>
 
         <a
-          href="#top"
+          href="/couture"
           onClick={(e) => {
             e.preventDefault()
-            scrollToId('top')
+            go('/couture#top')
           }}
           className="flex flex-col items-center text-center leading-none text-couture-bone"
-          aria-label="Stylemart, back to top"
+          aria-label="Stylemart, home"
         >
           <span className="font-bodoni text-[16px] tracking-[0.3em] [margin-right:-0.3em] sm:text-[19px] sm:tracking-[0.34em] sm:[margin-right:-0.34em] lg:text-[24px]">STYLEMART</span>
           <span className="mt-1.5 font-manrope text-[6.5px] sm:text-[7.5px] font-semibold tracking-[0.42em] [margin-right:-0.42em] text-couture-gold lg:text-[8.5px]">

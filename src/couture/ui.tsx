@@ -1,4 +1,5 @@
-import { useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { brand } from '../shared/data/story'
 
@@ -58,6 +59,23 @@ export function scrollToId(id: string) {
   if (!el) return
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: reduce ? 'auto' : 'smooth' })
+}
+
+/**
+ * Follow an in-site link: `/couture#story` smooth-scrolls when already on that page,
+ * anything else is a route change (ScrollManager handles landing on the hash).
+ */
+export function useGo() {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  return useCallback(
+    (href: string) => {
+      const [path, hash] = href.split('#')
+      if (hash && path === pathname) scrollToId(hash)
+      else navigate(href)
+    },
+    [navigate, pathname],
+  )
 }
 
 /** A line of type that rises out of an overflow mask. */

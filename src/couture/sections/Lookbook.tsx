@@ -1,7 +1,9 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
+import { Link } from 'react-router-dom'
 import { products } from '../../shared/data/products'
-import { Folio, btnLine, scrollToId, useIsDesktop } from '../ui'
+import { COLLECTION_PATH } from '../catalogue'
+import { Folio, btnLine, useIsDesktop } from '../ui'
 import Plate, { type Look } from './Plate'
 
 const looks: Look[] = [
@@ -84,16 +86,9 @@ function Outro() {
       <p className="mt-4 max-w-[30ch] font-manrope text-[14px] font-light leading-relaxed text-couture-bone/70">
         Every piece can be altered to measure, and bridal pieces are made to order.
       </p>
-      <a
-        href="#collections"
-        onClick={(e) => {
-          e.preventDefault()
-          scrollToId('collections')
-        }}
-        className={`${btnLine} mt-8 self-start`}
-      >
-        View all {products.length} pieces
-      </a>
+      <Link to={COLLECTION_PATH} className={`${btnLine} mt-8 self-start`}>
+        View all {products.length} pieces <span aria-hidden>→</span>
+      </Link>
     </div>
   )
 }

@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Minus, Plus, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { cartCount, cartSubtotal, useCart } from '../../shared/cart'
 import { productById } from '../../shared/data/products'
 import { formatSGD } from '../../shared/format'
-import { EASE, btnLine, btnSolid, scrollToId, useBodyLock, useEscape } from '../ui'
+import { COLLECTION_PATH } from '../catalogue'
+import { EASE, btnLine, btnSolid, useBodyLock, useEscape } from '../ui'
 
 export default function CartDrawer() {
   const { lines, isOpen, close, setQty, remove } = useCart()
+  const navigate = useNavigate()
   const [demoNote, setDemoNote] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const count = cartCount(lines)
@@ -66,17 +69,17 @@ export default function CartDrawer() {
               <div className="flex flex-1 flex-col items-start justify-center px-6 pb-24">
                 <p className="font-bodoni text-3xl italic leading-tight">Your bag is empty.</p>
                 <p className="mt-3 max-w-[30ch] font-manrope text-sm font-light leading-relaxed text-couture-bone/70">
-                  Open a + on any look in the lookbook to add a piece.
+                  Every piece in the house is in the collection, ready to add.
                 </p>
                 <button
                   type="button"
                   onClick={() => {
                     close()
-                    requestAnimationFrame(() => requestAnimationFrame(() => scrollToId('lookbook')))
+                    requestAnimationFrame(() => requestAnimationFrame(() => navigate(COLLECTION_PATH)))
                   }}
                   className={`${btnLine} mt-8`}
                 >
-                  Browse the lookbook
+                  Browse the collection
                 </button>
               </div>
             ) : (

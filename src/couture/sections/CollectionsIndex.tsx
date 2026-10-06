@@ -1,15 +1,16 @@
 import { useRef, useState, type MouseEvent } from 'react'
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react'
-import { products, type Product } from '../../shared/data/products'
-import { EASE, Folio, scrollToId, useMediaQuery } from '../ui'
+import { Link } from 'react-router-dom'
+import { collectionHref, countIn, filterBySlug } from '../catalogue'
+import { EASE, Folio, useMediaQuery } from '../ui'
 
-const rows: { name: string; match: (p: Product) => boolean; image: string; pos: string; line: string }[] = [
-  { name: 'Bridal Lengha', match: (p) => p.category === 'Lengha', image: '/media/editorial-bride-red.webp', pos: '28% 38%', line: 'Sequin, scallop and heirloom red' },
-  { name: 'Saree', match: (p) => p.category === 'Saree', image: '/media/runway-kl-1.webp', pos: '50% 40%', line: 'Ready-to-wear and pre-draped' },
-  { name: 'Gown', match: (p) => p.category === 'Gown', image: '/media/editorial-gown-black.webp', pos: '70% 30%', line: 'Ombré silks and Kashmiri gara' },
-  { name: 'Indo-Western', match: (p) => p.category === 'Indo-Western', image: '/media/editorial-gramophone.webp', pos: '55% 40%', line: 'Western cuts, Asian hands' },
-  { name: 'Asian Woman', match: (p) => p.collection === 'Asian Woman', image: '/media/editorial-trio.webp', pos: '50% 30%', line: 'Kavita’s own label, since 2004' },
-  { name: 'Menswear', match: (p) => p.category === 'Menswear', image: '/media/editorial-menswear.webp', pos: '30% 30%', line: 'Sherwanis and the SG60 Lion Suit' },
+const rows: { slug: string; image: string; pos: string; line: string }[] = [
+  { slug: 'bridal-lengha', image: '/media/editorial-bride-red.webp', pos: '28% 38%', line: 'Sequin, scallop and heirloom red' },
+  { slug: 'saree', image: '/media/runway-kl-1.webp', pos: '50% 40%', line: 'Ready-to-wear and pre-draped' },
+  { slug: 'gown', image: '/media/editorial-gown-black.webp', pos: '70% 30%', line: 'Ombré silks and Kashmiri gara' },
+  { slug: 'indo-western', image: '/media/editorial-gramophone.webp', pos: '55% 40%', line: 'Western cuts, Asian hands' },
+  { slug: 'asian-woman', image: '/media/editorial-trio.webp', pos: '50% 30%', line: 'Kavita’s own label, since 2004' },
+  { slug: 'menswear', image: '/media/editorial-menswear.webp', pos: '30% 30%', line: 'Sherwanis and the SG60 Lion Suit' },
 ]
 
 const roman = ['i', 'ii', 'iii', 'iv', 'v', 'vi']
@@ -82,15 +83,11 @@ function HoverList() {
       </motion.div>
 
       {rows.map((r, i) => {
-        const count = products.filter(r.match).length
+        const f = filterBySlug(r.slug)
         return (
-          <li key={r.name} className="relative border-b border-couture-gold/25">
-            <a
-              href="#lookbook"
-              onClick={(e) => {
-                e.preventDefault()
-                scrollToId('lookbook')
-              }}
+          <li key={r.slug} className="relative border-b border-couture-gold/25">
+            <Link
+              to={collectionHref(r.slug)}
               onMouseEnter={() => setActive(i)}
               onFocus={(e) => {
                 setActive(i)
@@ -105,14 +102,14 @@ function HoverList() {
               <span className="font-bodoni text-xl italic text-couture-gold">{roman[i]}.</span>
               <span className="flex items-baseline gap-8">
                 <span className="font-bodoni text-[clamp(2.75rem,5.6vw,5.75rem)] leading-[1] tracking-[-0.015em] text-couture-bone transition-transform duration-700 ease-couture group-hover/row:translate-x-6 group-focus-visible/row:translate-x-6">
-                  {r.name}
+                  {f.name}
                 </span>
                 <span className="hidden font-manrope text-[12px] text-couture-mute xl:inline">{r.line}</span>
               </span>
               <span className="font-manrope text-[11px] font-semibold uppercase tracking-[0.24em] text-couture-gold-light">
-                {countLabel(count)}
+                {countLabel(countIn(f))} <span aria-hidden>→</span>
               </span>
-            </a>
+            </Link>
           </li>
         )
       })}
@@ -124,15 +121,8 @@ function Cards() {
   return (
     <ul className="mt-12 grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5">
       {rows.map((r, i) => (
-        <li key={r.name}>
-          <a
-            href="#lookbook"
-            onClick={(e) => {
-              e.preventDefault()
-              scrollToId('lookbook')
-            }}
-            className="group block"
-          >
+        <li key={r.slug}>
+          <Link to={collectionHref(r.slug)} className="group block">
             <div className="border border-couture-gold/35 p-1.5">
               <img
                 src={r.image}
@@ -143,11 +133,11 @@ function Cards() {
               />
             </div>
             <p className="mt-3 font-bodoni text-sm italic text-couture-gold">{roman[i]}.</p>
-            <p className="font-bodoni text-[1.45rem] leading-tight text-couture-bone">{r.name}</p>
+            <p className="font-bodoni text-[1.45rem] leading-tight text-couture-bone">{filterBySlug(r.slug).name}</p>
             <p className="mt-1 font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-mute">
-              {countLabel(products.filter(r.match).length)}
+              {countLabel(countIn(filterBySlug(r.slug)))} <span aria-hidden>→</span>
             </p>
-          </a>
+          </Link>
         </li>
       ))}
     </ul>
