@@ -10,11 +10,9 @@ export interface Look {
   id: string
   /** Craft details shown in the shop card, drawn from the product name and note */
   details: string[]
-  /** Where the hotspot sits on the photo */
-  main: { x: number; y: number }
 }
 
-/** A look (one complete outfit) presented as a framed plate with a single shop hotspot. */
+/** A look (one complete outfit) presented as a framed plate; the shop hotspot sits in the same corner on every plate. */
 export default function Plate({ look, index, className = '' }: { look: Look; index: number; className?: string }) {
   const p = productById(look.id)!
   const [open, setOpen] = useState(false)
@@ -61,7 +59,7 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-couture-ink/25 via-transparent to-transparent" />
           <span className="absolute left-3 top-3 font-bodoni text-sm italic text-couture-ink/70">Plate {no}</span>
 
-          <div className="absolute z-10" style={{ left: `${look.main.x}%`, top: `${look.main.y}%` }}>
+          <div className="absolute right-2 top-2 z-30 sm:right-3 sm:top-3">
             <SpotButton
               open={open}
               onClick={() => setOpen((o) => !o)}
@@ -80,14 +78,6 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
                 exit={{ opacity: 0, y: 16 }}
                 transition={{ duration: 0.5, ease: EASE }}
               >
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close"
-                  className="absolute right-1.5 top-1.5 grid size-8 place-items-center text-couture-mute hover:text-couture-bone"
-                >
-                  <Plus className="size-4 rotate-45" strokeWidth={1.4} aria-hidden />
-                </button>
                 <p className="font-manrope text-[9.5px] font-semibold uppercase tracking-[0.26em] text-couture-gold">
                   Look {no} {p.isNew && <span className="text-couture-mute">/ New</span>}
                 </p>
@@ -158,7 +148,7 @@ function SpotButton({
       aria-expanded={open}
       aria-controls={controls}
       aria-label={label}
-      className="relative -ml-5 -mt-5 grid size-10 place-items-center"
+      className="relative grid size-10 place-items-center"
     >
       {!open && (
         <span

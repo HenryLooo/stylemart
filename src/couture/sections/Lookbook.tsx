@@ -10,42 +10,34 @@ const looks: Look[] = [
   {
     id: 'p9',
     details: ['Full-sleeve sequin blouse', 'Blush sequin lengha'],
-    main: { x: 58, y: 52 },
   },
   {
     id: 'p3',
     details: ['Hand-worked Kashmiri gara sleeves', 'Teal-to-sapphire ombré silk'],
-    main: { x: 52, y: 40 },
   },
   {
     id: 'p11',
     details: ['Hand-painted, gara-embroidered pallu', 'Champagne draped gown'],
-    main: { x: 52, y: 58 },
   },
   {
     id: 'p13',
     details: ['Hand-embroidered lion-mane shoulder', 'SG60 edition Indo-Western tuxedo'],
-    main: { x: 52, y: 42 },
   },
   {
     id: 'p7',
     details: ['Sculpted full-sleeve jacket', 'Printed silver saree gown'],
-    main: { x: 50, y: 52 },
   },
   {
     id: 'p2',
     details: ['Embellished bustier', 'Liquid-metal drape'],
-    main: { x: 46, y: 64 },
   },
   {
     id: 'p5',
     details: ['Sweetheart bodice', 'Threadwork skirt in petal pink'],
-    main: { x: 58, y: 48 },
   },
   {
     id: 'p6',
     details: ['Structured beaded blouse', 'Pre-draped metallic saree'],
-    main: { x: 45, y: 66 },
   },
 ]
 
