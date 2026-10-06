@@ -1,4 +1,4 @@
-import { products, type Product } from '../shared/data/products'
+import type { Product } from '../shared/catalog/types'
 
 export const COLLECTION_PATH = '/couture/collection'
 
@@ -24,7 +24,7 @@ export const filterBySlug = (slug: string | null) => filters.find((f) => f.slug 
 export const collectionHref = (slug?: string) =>
   slug && slug !== 'all' ? `${COLLECTION_PATH}?c=${slug}` : COLLECTION_PATH
 
-export const countIn = (f: Filter) => products.filter(f.match).length
+export const countIn = (f: Filter, list: Product[]) => list.filter(f.match).length
 
 export const sorts = [
   { value: 'featured', label: 'Featured' },

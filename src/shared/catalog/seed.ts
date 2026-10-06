@@ -1,31 +1,13 @@
-// Real catalogue scraped from stylemart.sg on 2026-10-06.
+// Real catalogue scraped from stylemart.sg on 2026-10-06; the first-run contents of the catalog.
 // `price: null` = listed without a price on the live site (bespoke / enquiry).
+// Stock counts are SAMPLE figures for the demo.
+import type { Product } from './types'
 
-export type Category =
-  | 'Lengha'
-  | 'Saree'
-  | 'Gown'
-  | 'Indo-Western'
-  | 'Pants Suit'
-  | 'Menswear'
-
-export interface Product {
-  id: string
-  name: string
-  price: number | null
-  category: Category
-  /** Tab grouping used on the live homepage */
-  collection: 'Lengha' | 'Saree' | 'Asian Woman'
-  image: string
-  /** Waist-up crop, when the site has one */
-  closeup?: string
-  note: string
-  isNew?: boolean
-}
+type SeedProduct = Omit<Product, 'sku' | 'stock' | 'status' | 'details' | 'createdAt' | 'updatedAt'>
 
 const img = (n: string) => `/media/${n}.webp`
 
-export const products: Product[] = [
+const base: SeedProduct[] = [
   {
     id: 'p1',
     name: 'The Peach & Mint Brocade High-Low Gown',
@@ -169,6 +151,45 @@ export const products: Product[] = [
   },
 ]
 
-export const productById = (id: string) => products.find((p) => p.id === id)
+const PREFIX: Record<Product['category'], string> = {
+  Lengha: 'LEN',
+  Saree: 'SAR',
+  Gown: 'GWN',
+  'Indo-Western': 'IWW',
+  'Pants Suit': 'PNT',
+  Menswear: 'MEN',
+}
 
-export const collections = ['Lengha', 'Saree', 'Asian Woman'] as const
+// Sample stock for priced pieces (made-to-order pieces don't track stock); p9 and p13 are low
+const stock: Record<string, number> = { p5: 4, p6: 5, p7: 3, p9: 1, p10: 6, p11: 2, p12: 4, p13: 2, p14: 5 }
+
+// Craft notes (previously lookbook-only annotations)
+const details: Record<string, string[]> = {
+  p9: ['Full-sleeve sequin blouse', 'Blush sequin lengha'],
+  p3: ['Hand-worked Kashmiri gara sleeves', 'Teal-to-sapphire ombré silk'],
+  p11: ['Hand-painted, gara-embroidered pallu', 'Champagne draped gown'],
+  p13: ['Hand-embroidered lion-mane shoulder', 'SG60 edition Indo-Western tuxedo'],
+  p7: ['Sculpted full-sleeve jacket', 'Printed silver saree gown'],
+  p2: ['Embellished bustier', 'Liquid-metal drape'],
+  p5: ['Sweetheart bodice', 'Threadwork skirt in petal pink'],
+  p6: ['Structured beaded blouse', 'Pre-draped metallic saree'],
+}
+
+const SEEDED_AT = '2026-10-06T00:00:00.000Z'
+
+export function seedProducts(): Product[] {
+  const counters: Record<string, number> = {}
+  return base.map((p) => {
+    const prefix = PREFIX[p.category]
+    counters[prefix] = (counters[prefix] ?? 0) + 1
+    return {
+      ...p,
+      sku: `SM-${prefix}-${String(counters[prefix]).padStart(4, '0')}`,
+      stock: stock[p.id] ?? 0,
+      status: 'active',
+      details: details[p.id] ?? [],
+      createdAt: SEEDED_AT,
+      updatedAt: SEEDED_AT,
+    }
+  })
+}

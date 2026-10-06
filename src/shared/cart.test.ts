@@ -1,10 +1,16 @@
+// @vitest-environment jsdom
+import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useCart, cartCount, cartSubtotal } from './cart'
+import { catalogRepo } from './catalog/store'
 
 const state = () => useCart.getState()
 
 describe('cart store', () => {
-  beforeEach(() => useCart.setState({ lines: [], isOpen: false }))
+  beforeEach(async () => {
+    await catalogRepo.reset()
+    useCart.setState({ lines: [], isOpen: false })
+  })
 
   it('adds a product and increments qty on repeat add', () => {
     state().add('p5')
@@ -51,7 +57,35 @@ describe('cart store', () => {
   })
 
   it('ignores price-on-request products', () => {
-    state().add('p1')
+    expect(state().add('p1')).toBe(false)
     expect(state().lines).toEqual([])
+  })
+
+  it('never exceeds stock', () => {
+    // p9 has 1 in stock
+    expect(state().add('p9')).toBe(true)
+    expect(state().add('p9')).toBe(false)
+    state().setQty('p9', 5)
+    expect(state().lines).toEqual([{ id: 'p9', qty: 1 }])
+  })
+
+  it('refuses sold-out and inactive products', async () => {
+    await catalogRepo.update('p5', { stock: 0 })
+    await catalogRepo.update('p6', { status: 'draft' })
+    expect(state().add('p5')).toBe(false)
+    expect(state().add('p6')).toBe(false)
+    expect(state().lines).toEqual([])
+  })
+
+  it('prunes and clamps lines when the catalog changes', async () => {
+    state().add('p5')
+    state().add('p5')
+    state().add('p5')
+    state().add('p6')
+    state().add('p7')
+    await catalogRepo.update('p5', { stock: 2 })
+    await catalogRepo.update('p6', { status: 'archived' })
+    await catalogRepo.remove('p7')
+    expect(state().lines).toEqual([{ id: 'p5', qty: 2 }])
   })
 })

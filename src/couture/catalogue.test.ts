@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { products } from '../shared/data/products'
+import { seedProducts } from '../shared/catalog/seed'
 import { collectionHref, filterBySlug, filters, sortProducts } from './catalogue'
+
+const products = seedProducts()
 
 describe('catalogue', () => {
   it('falls back to all pieces for unknown or missing slugs', () => {
