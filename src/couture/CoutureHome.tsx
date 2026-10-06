@@ -15,6 +15,7 @@ import Voices from './sections/Voices'
 import Visit from './sections/Visit'
 import Footer from './sections/Footer'
 import CartDrawer from './sections/CartDrawer'
+import BagToast from './sections/BagToast'
 
 /**
  * Mockup 2, "Couture": Stylemart as a couture house and Kavita Thulasidas as its
@@ -62,6 +63,7 @@ export default function CoutureHome() {
       <Footer />
       <MenuOverlay open={menu} onClose={closeMenu} />
       <SearchOverlay open={search} onClose={closeSearch} />
+      <BagToast />
       <CartDrawer />
       <Grain />
     </div>

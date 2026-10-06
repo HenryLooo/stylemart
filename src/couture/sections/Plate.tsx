@@ -2,9 +2,9 @@ import { useId, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Plus } from 'lucide-react'
 import { productById } from '../../shared/data/products'
-import { useCart } from '../../shared/cart'
 import { formatPrice } from '../../shared/format'
 import { EASE, whatsappLink } from '../ui'
+import AddToBagButton from './AddToBagButton'
 
 export interface Spot {
   x: number
@@ -24,20 +24,16 @@ export interface Look {
 export default function Plate({ look, index, className = '' }: { look: Look; index: number; className?: string }) {
   const p = productById(look.id)!
   const [open, setOpen] = useState<number | 'main' | null>(null)
-  const add = useCart((s) => s.add)
   const uid = useId()
   const no = String(index + 1).padStart(2, '0')
   const toggle = (k: number | 'main') => setOpen((o) => (o === k ? null : k))
 
   const action =
     p.price != null ? (
-      <button
-        type="button"
-        onClick={() => add(p.id)}
+      <AddToBagButton
+        id={p.id}
         className="font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-gold transition-colors hover:text-couture-gold-light"
-      >
-        Add to bag
-      </button>
+      />
     ) : (
       <a
         href={whatsappLink(`Hello Stylemart, I'd like to book a fitting for ${p.name}.`)}
@@ -140,13 +136,11 @@ export default function Plate({ look, index, className = '' }: { look: Look; ind
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-couture-gold/25 pt-3">
                   <span className="whitespace-nowrap font-bodoni text-base text-couture-gold-light sm:text-lg">{formatPrice(p.price)}</span>
                   {p.price != null ? (
-                    <button
-                      type="button"
-                      onClick={() => add(p.id)}
+                    <AddToBagButton
+                      id={p.id}
+                      label="Add to Bag"
                       className="whitespace-nowrap bg-couture-gold px-4 py-2.5 font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-ink transition-colors hover:bg-couture-gold-light"
-                    >
-                      Add to Bag
-                    </button>
+                    />
                   ) : (
                     <a
                       href={whatsappLink(`Hello Stylemart, I'd like to book a fitting for ${p.name}.`)}

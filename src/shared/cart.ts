@@ -9,7 +9,8 @@ export interface CartLine {
 interface CartState {
   lines: CartLine[]
   isOpen: boolean
-  add: (id: string) => void
+  /** `open: false` adds silently, for pages that confirm with their own UI */
+  add: (id: string, opts?: { open?: boolean }) => void
   remove: (id: string) => void
   setQty: (id: string, qty: number) => void
   open: () => void
@@ -19,7 +20,7 @@ interface CartState {
 export const useCart = create<CartState>((set) => ({
   lines: [],
   isOpen: false,
-  add: (id) =>
+  add: (id, { open = true } = {}) =>
     set((s) => {
       // Price-on-request pieces are booked by appointment, not bought online
       if (productById(id)?.price == null) return s
@@ -27,7 +28,7 @@ export const useCart = create<CartState>((set) => ({
       const lines = existing
         ? s.lines.map((l) => (l.id === id ? { ...l, qty: l.qty + 1 } : l))
         : [...s.lines, { id, qty: 1 }]
-      return { lines, isOpen: true }
+      return { lines, isOpen: open || s.isOpen }
     }),
   remove: (id) => set((s) => ({ lines: s.lines.filter((l) => l.id !== id) })),
   setQty: (id, qty) =>

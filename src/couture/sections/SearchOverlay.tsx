@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
 import { products } from '../../shared/data/products'
-import { useCart } from '../../shared/cart'
+import { addToBag } from '../bagToast'
 import { formatPrice } from '../../shared/format'
 import { EASE, useBodyLock, useEscape, whatsappLink } from '../ui'
 
@@ -10,7 +10,6 @@ const suggestions = ['Lengha', 'Saree', 'Gown', 'Menswear', 'Kashmiri gara']
 
 export default function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [q, setQ] = useState('')
-  const add = useCart((s) => s.add)
   useBodyLock(open)
   useEscape(open, onClose)
 
@@ -93,7 +92,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                           type="button"
                           onClick={() => {
                             onClose()
-                            add(p.id)
+                            addToBag(p.id)
                           }}
                           className="mt-2 font-manrope text-[10px] font-semibold uppercase tracking-[0.22em] text-couture-gold hover:text-couture-gold-light"
                         >

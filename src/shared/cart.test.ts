@@ -17,6 +17,12 @@ describe('cart store', () => {
     expect(state().isOpen).toBe(true)
   })
 
+  it('can add without opening the drawer', () => {
+    state().add('p5', { open: false })
+    expect(state().isOpen).toBe(false)
+    expect(state().lines).toEqual([{ id: 'p5', qty: 1 }])
+  })
+
   it('removes a line', () => {
     state().add('p5')
     state().add('p6')
