@@ -13,7 +13,7 @@ const concepts = [
     to: '/couture',
     no: '02',
     name: 'Couture',
-    line: 'Stylemart as a couture house. A shoppable editorial that tells Kavita’s 25-year story chapter by chapter.',
+    line: 'Stylemart as a couture house. A shoppable editorial that tells Kavita’s 27-year story chapter by chapter.',
     image: '/media/editorial-reclining.webp',
   },
 ]
