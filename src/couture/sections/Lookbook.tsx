@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { useActiveProducts } from '../../shared/catalog/store'
@@ -80,6 +80,9 @@ function sequence(
   })
 }
 
+// Scroll-driven CSS animations move the strip on the compositor; without them, Motion moves it from scroll events
+const cssScroll = typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
+
 /** Desktop: vertical scroll drives a horizontal strip, pinned to the viewport. */
 function Horizontal({ looks, total }: { looks: Product[]; total: number }) {
   const section = useRef<HTMLElement>(null)
@@ -109,17 +112,21 @@ function Horizontal({ looks, total }: { looks: Product[]; total: number }) {
       ref={section}
       id="lookbook"
       aria-label="The lookbook"
-      className="relative bg-couture-ink"
-      style={{ height: `calc(100svh + ${dist}px)` }}
+      className={`relative bg-couture-ink ${cssScroll ? 'lookbook-timeline' : ''}`}
+      style={{ height: `calc(100svh + ${dist}px)`, '--lookbook-dist': `${dist}px` } as CSSProperties}
     >
       <div className="sticky top-0 h-svh overflow-clip">
         <div aria-hidden className="absolute inset-x-10 top-20 z-10 h-px bg-couture-bone/10">
-          <motion.div className="h-full origin-left bg-couture-gold" style={{ scaleX: progress }} />
+          {cssScroll ? (
+            <div className="lookbook-progress h-full origin-left bg-couture-gold" />
+          ) : (
+            <motion.div className="h-full origin-left bg-couture-gold" style={{ scaleX: progress }} />
+          )}
         </div>
         <motion.div
           ref={track}
-          className="flex h-full w-max items-stretch gap-[5vw] pl-10 will-change-transform"
-          style={{ x }}
+          className={`flex h-full w-max items-stretch gap-[5vw] pl-10 will-change-transform ${cssScroll ? 'lookbook-track' : ''}`}
+          style={cssScroll ? undefined : { x }}
           onFocusCapture={(e) => {
             // Keyboard users: bring the focused look into view by scrolling the page
             // (only :focus-visible: a mouse click also focuses, and scrolling mid-click would make it miss)

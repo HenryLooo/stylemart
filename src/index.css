@@ -66,6 +66,37 @@ img {
   }
 }
 
+/*
+ * Couture lookbook: page scroll drives the pinned strip sideways. Scroll-driven animations run on the
+ * compositor, so the strip moves in step with native scrolling (Lookbook.tsx falls back to JS without them).
+ * The section's [start start, end end] scroll span is its view timeline's `contain` range.
+ */
+@keyframes lookbook-track {
+  to {
+    transform: translateX(calc(-1 * var(--lookbook-dist, 0px)));
+  }
+}
+@keyframes lookbook-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.lookbook-timeline {
+  view-timeline: --lookbook block;
+}
+.lookbook-track,
+.lookbook-progress {
+  animation: lookbook-track linear both;
+  animation-timeline: --lookbook;
+  animation-range: contain 0% contain 100%;
+}
+.lookbook-progress {
+  animation-name: lookbook-progress;
+}
+
 /* Utility: hide scrollbar on horizontal rails */
 .no-scrollbar {
   scrollbar-width: none;
