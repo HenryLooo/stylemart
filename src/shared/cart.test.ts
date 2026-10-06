@@ -1,0 +1,51 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { useCart, cartCount, cartSubtotal } from './cart'
+
+const state = () => useCart.getState()
+
+describe('cart store', () => {
+  beforeEach(() => useCart.setState({ lines: [], isOpen: false }))
+
+  it('adds a product and increments qty on repeat add', () => {
+    state().add('p5')
+    state().add('p5')
+    expect(state().lines).toEqual([{ id: 'p5', qty: 2 }])
+  })
+
+  it('opens the drawer when adding', () => {
+    state().add('p5')
+    expect(state().isOpen).toBe(true)
+  })
+
+  it('removes a line', () => {
+    state().add('p5')
+    state().add('p6')
+    state().remove('p5')
+    expect(state().lines).toEqual([{ id: 'p6', qty: 1 }])
+  })
+
+  it('setQty to 0 removes the line', () => {
+    state().add('p5')
+    state().setQty('p5', 0)
+    expect(state().lines).toEqual([])
+  })
+
+  it('counts total quantity', () => {
+    state().add('p5')
+    state().add('p5')
+    state().add('p6')
+    expect(cartCount(state().lines)).toBe(3)
+  })
+
+  it('computes subtotal from product prices', () => {
+    state().add('p5') // 490
+    state().add('p6') // 415
+    state().add('p6')
+    expect(cartSubtotal(state().lines)).toBe(490 + 415 * 2)
+  })
+
+  it('ignores price-on-request products', () => {
+    state().add('p1')
+    expect(state().lines).toEqual([])
+  })
+})

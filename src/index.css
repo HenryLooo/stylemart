@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Typography */
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-poppins: 'Poppins', system-ui, sans-serif;
+  --font-bodoni: 'Bodoni Moda', 'Didot', Georgia, serif;
+  --font-manrope: 'Manrope', system-ui, sans-serif;
+
+  /* Mockup 1: Classic (faithful to the live site) */
+  --color-classic-ink: #2b2b2b;
+  --color-classic-charcoal: #1f1f1f;
+  --color-classic-gold: #c59d5f;
+  --color-classic-gold-dark: #a8823f;
+  --color-classic-paper: #fafaf7;
+  --color-classic-line: #e9e4da;
+  --color-classic-muted: #6f6a62;
+
+  /* Mockup 2: Couture (editorial) */
+  --color-couture-ink: #0e0c0a;
+  --color-couture-ink-2: #17130f;
+  --color-couture-bone: #efe7da;
+  --color-couture-gold: #b8955a;
+  --color-couture-gold-light: #d8bd8a;
+  --color-couture-oxblood: #5a1a1f;
+  --color-couture-mute: #9a9184;
+
+  --ease-couture: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utility: hide scrollbar on horizontal rails */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
