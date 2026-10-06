@@ -66,15 +66,15 @@ export default function Hero() {
           <h1 className="font-prata font-normal uppercase leading-[0.86] tracking-[-0.01em] text-couture-bone">
             <span className="sr-only">Kavita Thulasidas</span>
             <span aria-hidden>
-              <MaskLine delay={0.35} duration={1.4} className="text-[13vw] lg:text-[13.2vw]">
+              <MaskLine delay={0.35} duration={1.4} className="pt-[0.14em] text-[13vw] lg:text-[13.2vw]">
                 Kavita
               </MaskLine>
-              <MaskLine delay={0.5} duration={1.4} className="text-[13vw] lg:text-[13.2vw]">
+              <MaskLine delay={0.5} duration={1.4} className="-mt-[0.14em] pt-[0.14em] text-[13vw] lg:text-[13.2vw]">
                 Thulasidas
               </MaskLine>
             </span>
           </h1>
-          <motion.div {...fadeIn(1.5)} className="absolute right-0 top-[0.6vw] hidden max-w-sm lg:block">
+          <motion.div {...fadeIn(1.5)} className="absolute right-0 top-[2.45vw] hidden max-w-sm lg:block">
             <HeroCopy />
           </motion.div>
         </div>
