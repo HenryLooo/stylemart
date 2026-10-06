@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { ProductImage } from '../shared/catalog/ProductImage'
 import { useActiveProducts } from '../shared/catalog/store'
+import { usePreloadImage } from '../shared/catalog/usePreloadImage'
 import { isMadeToOrder, isSoldOut, type Product } from '../shared/catalog/types'
 import { formatPrice } from '../shared/format'
 import CoutureShell from './CoutureShell'
@@ -197,6 +198,7 @@ export default function CollectionPage() {
 function Card({ p }: { p: Product }) {
   const madeToOrder = isMadeToOrder(p)
   const soldOut = isSoldOut(p)
+  usePreloadImage(p.closeup)
   return (
     <motion.li
       layout
@@ -225,7 +227,6 @@ function Card({ p }: { p: Product }) {
                 src={p.closeup}
                 alt=""
                 aria-hidden
-                loading="lazy"
                 className={`absolute inset-0 h-full w-full scale-[1.06] object-cover object-top transition-[clip-path,transform] duration-[900ms] ease-couture [clip-path:inset(100%_0_0_0)] group-hover:scale-100 group-hover:[clip-path:inset(0_0_0_0)] group-focus-within:scale-100 group-focus-within:[clip-path:inset(0_0_0_0)] ${
                   soldOut ? 'opacity-60' : ''
                 }`}

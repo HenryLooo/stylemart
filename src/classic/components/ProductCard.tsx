@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { Heart, Plus } from 'lucide-react'
 import { ProductImage } from '../../shared/catalog/ProductImage'
+import { usePreloadImage } from '../../shared/catalog/usePreloadImage'
 import { isMadeToOrder, isSoldOut, type Product } from '../../shared/catalog/types'
 import { useCart } from '../../shared/cart'
 import { formatPrice } from '../../shared/format'
@@ -16,6 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add)
   const { closeup } = product
   const soldOut = isSoldOut(product)
+  usePreloadImage(closeup)
 
   useEffect(() => {
     if (!atLimit) return
@@ -39,7 +41,6 @@ export function ProductCard({ product }: { product: Product }) {
             src={closeup}
             alt=""
             aria-hidden
-            loading="lazy"
             className="absolute inset-0 h-full w-full scale-[1.04] object-cover object-top opacity-0 transition duration-700 ease-out group-hover/card:scale-100 group-hover/card:opacity-100"
           />
         )}
